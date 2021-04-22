@@ -25,17 +25,25 @@
             <v-container>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field v-model="signUpEmail"
-        :error-messages="errors" label="Email" required></v-text-field>
+                  <v-text-field 
+                  v-model="signUpEmail"
+                  :error-messages="errors" 
+                   label="Email" 
+                   required>
+                   </v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="signUpUsername"
-        :error-messages="errors" label="Username" required></v-text-field>
+                  <v-text-field 
+                  v-model="signUpUsername"
+                  :error-messages="errors" 
+                  label="Username" 
+                  required>
+                  </v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
                     v-model="signUpPassword"
-                   :error-messages="errors"
+                    :error-messages="errors"
                     label="Password"
                     :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPass ? 'text' : 'password'"
@@ -48,8 +56,13 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn v-on:click="register" class="createAccount-btn" type="submit"
-            color="red darken-1" text @click="showSignUpForm = false">
+            <v-btn 
+            v-on:click="register" 
+            class="createAccount-btn" 
+            type="submit"
+            color="red darken-1" 
+            text
+            @click="showSignUpForm = false">
               Create Account
             </v-btn>
           </v-card-actions>
@@ -135,13 +148,12 @@ export default {
         e.preventDefault();
     },
       login: function(e){
-        console.log(this.signInEmail)
         firebase.auth().signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
             .then(user => {
               alert('You are logged in as '+this.signInEmail);
               this.showSignInForm = false;
               this.$root.loggedIn = true;
-              this.$router.push('/');
+              this.$router.push('/groups');
               console.log(user)
               },
               err => {
