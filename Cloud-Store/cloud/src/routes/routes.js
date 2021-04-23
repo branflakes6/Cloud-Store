@@ -14,16 +14,39 @@ let router = new Router({
             meta: {},
         },
         {
-            path:"/groups",
+            path:"/groupManagment",
             name:"groupsPage",
             component: () =>
             import(
-               /*webpackChunkName: "groups"*/ "..//components//groupsPage.vue" 
+               /*webpackChunkName: "groupManagment"*/ "..//components//groupsPage.vue" 
+            ),
+            meta:{
+                requiresAuth: true
+            }
+        },
+        {
+            path:"/myGroups",
+            name:"myGroups",
+            component: () =>
+            import(
+               /*webpackChunkName: "myGroups"*/ "..//components//myGroups.vue" 
+            ),
+            meta:{
+                requiresAuth: true
+            }
+        },
+        {
+            path:"/group/:groupId",
+            name:"group",
+            component: () =>
+            import(
+               /*webpackChunkName: "group"*/ "..//components//group.vue" 
             ),
             meta:{
                 requiresAuth: true
             }
         }
+        
     ]
 })
 router.beforeEach((to, from, next) => {
@@ -53,5 +76,5 @@ router.beforeEach((to, from, next) => {
       next();
     }
   });
-  
+
 export default router;

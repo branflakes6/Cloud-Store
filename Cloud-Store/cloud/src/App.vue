@@ -5,13 +5,23 @@
 </template>
 
 <script>
-//import homePage from './components/homePage.vue'
-
+import firebase from "firebase";
 export default {
   name: 'App',
   components: {
-   // homePage,
-  }
+  },
+  watch: {
+        $route() {
+            if(firebase.auth().currentUser){
+                this.loggedIn = true
+                this.userEmail = firebase.auth().currentUser.email
+            }
+            else{
+                this.loggedIn = false
+                this.user = ""
+            }
+        }
+    },
 }
 </script>
 

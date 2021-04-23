@@ -115,7 +115,7 @@
 </template>
 
 <script>
-import firebase from '../firebase'
+import firebase from 'firebase'
 export default {
   name: "homePage",
   components: {},
@@ -148,12 +148,13 @@ export default {
         e.preventDefault();
     },
       login: function(e){
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         firebase.auth().signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
             .then(user => {
               alert('You are logged in as '+this.signInEmail);
               this.showSignInForm = false;
               this.$root.loggedIn = true;
-              this.$router.push('/groups');
+              this.$router.push('/groupManagment');
               console.log(user)
               },
               err => {

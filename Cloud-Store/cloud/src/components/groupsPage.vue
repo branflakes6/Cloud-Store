@@ -3,6 +3,9 @@
     <v-btn v-on:click.stop="newGroup = !newGroup">
         create a group
     </v-btn>
+    <v-btn to="/myGroups" >
+        Show Groups
+    </v-btn>
 <v-dialog v-model="newGroup" max-width="500px">
     <v-card>
         <v-card-title>
@@ -39,7 +42,8 @@
 
 <script>
 import upload from "./upload"
-import firebase from "firebase/app";
+import firebase from 'firebase';
+
 const db = firebase.firestore();
 export default {
     name: "groupsPage",
@@ -64,6 +68,8 @@ export default {
                             groupID: docRef.id
                         }),
                     })
+
+
                 }.bind(this)
             )
     },
