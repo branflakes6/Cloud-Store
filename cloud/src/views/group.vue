@@ -6,32 +6,37 @@
  </v-row>
 
  <v-row>
+     <div v-if="isOwner">
    <v-btn
    v-on:click="showAddMember = !showAddMember"
+   class="ma-4"
    >
     Add a member
     </v-btn>
+    </div>
  </v-row>
   <v-row>
-    <div>
+    <div class="ma-4">
     <input type="file" ref="file" v-on:change="handleUpload()"/>
     <v-btn v-on:click="uploadFile()">Upload</v-btn>
    </div>
     
 </v-row>
-<v-row>
-    <v-btn v-on:click="listFiles()">list files</v-btn>
+<v-row align="center">
+    <v-btn v-on:click="listFiles()" class="ma-4">list files</v-btn>
 </v-row>
-<v-row>
-<div v-for="item in fileList" :key="item.name">
-    {{item.fullPath}}
-</div>
-</v-row>
-<v-row>
-    <v-btn v-on:click="downloadFile()">
-        Download
+<div v-for="item in fileList" :key="item.name" class="ma-4"> 
+    <v-row >
+    <v-btn 
+    align="center" 
+    justify="space-around" 
+    class="ma-4"
+    v-on:click="downloadFile(item)"
+    >
+    {{item.name}}
     </v-btn>
-</v-row>
+    </v-row>
+</div>
 </v-container>
 <v-dialog v-model="showAddMember">
   <v-card>
@@ -55,6 +60,7 @@
 <script>
 import {db, st} from '../firebase'
 import firebase from 'firebase/app'
+import fileDownload from 'js-file-download';
 export default {
     name: "group",
     components: {
@@ -74,25 +80,26 @@ export default {
                     })
                 )
         },
-        downloadFile(){
-            st.ref().child("YqscZpHvtADt3LAdJpjK/file").getDownloadURL().then((url) =>{
-                 var xhr = new XMLHttpRequest();
-                 xhr.responseType = 'blob';
-                 xhr.onload = () => {
+        downloadFile(file){
+            st.ref().child(file.fullPath).getDownloadURL().then((url) =>{
+                var xhr = new XMLHttpRequest();
+                xhr.responseType = 'blob';
+                xhr.onload = () => {
                 let blob = xhr.response;
                 const fr = new FileReader();
                  fr.readAsDataURL(blob);
                  fr.onload = function (event)  {
                 const text = event.target.result;
-                console.log(atob(text.split(",")[1]));
+                let resp = atob(text.split(",")[1]);
+                fileDownload(resp, file.name)
               };
-                };
-                
+            };  
                 xhr.open('GET', url);
                 xhr.send();
             })
         },
         listFiles(){
+            this.fileList = []
             var listRef = st.ref().child(this.groupId)
             listRef.listAll()
             .then((res) => {
@@ -108,7 +115,7 @@ export default {
     },
     uploadFile(){
       console.log(this.file)
-      st.ref().child(`${this.groupId}/file`).put(this.file)
+      st.ref().child(`${this.groupId}/${this.file.name}`).put(this.file)
      },
     },
     created() {
@@ -125,9 +132,9 @@ export default {
             imageData: null,
             picture: null,
             uploadValue: 0,
-            file: '',
             newMember: "",
             fileList: [],
+            isOwner: false,
         }
     }
 }

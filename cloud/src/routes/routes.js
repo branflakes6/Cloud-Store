@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
-import homePage from "@/components/homePage";
+import homePage from "@/views/homePage";
 import {auth} from "../firebase";
 
 Vue.use(Router);
@@ -18,7 +18,7 @@ let router = new Router({
           name: "login",
           component: () =>
             import(
-               /*webpackChunkName: "login"*/ "..//components//logIn.vue" 
+               /*webpackChunkName: "login"*/ "..//views//logIn.vue" 
             ),
         },
         {
@@ -26,7 +26,7 @@ let router = new Router({
             name:"groupsPage",
             component: () =>
             import(
-               /*webpackChunkName: "groupManagment"*/ "..//components//groupsPage.vue" 
+               /*webpackChunkName: "groupManagment"*/ "..//views//groupsPage.vue" 
             ),
             meta:{
                 requiresAuth: true
@@ -37,7 +37,7 @@ let router = new Router({
             name:"myGroups",
             component: () =>
             import(
-               /*webpackChunkName: "myGroups"*/ "..//components//myGroups.vue" 
+               /*webpackChunkName: "myGroups"*/ "..//views//myGroups.vue" 
             ),
             meta:{
                 requiresAuth: true
@@ -48,7 +48,7 @@ let router = new Router({
             name:"group",
             component: () =>
             import(
-               /*webpackChunkName: "group"*/ "..//components//group.vue" 
+               /*webpackChunkName: "group"*/ "..//views//group.vue" 
             ),
             meta:{
                 requiresAuth: true
