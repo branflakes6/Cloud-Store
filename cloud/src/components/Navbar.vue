@@ -34,10 +34,6 @@ data: () => ({
         to: "/",
       },
       {
-        title: "groups Page",
-        to: "/groupManagment"
-      },
-      {
         title: "Login",
         to: "/login",
       },

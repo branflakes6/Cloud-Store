@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "firebase": "^8.4.1",
+    "hybrid-crypto-js": "^0.2.4",
     "js-file-download": "^0.4.12",
     "vue": "^2.6.11",
     "vue-router": "^3.5.1",

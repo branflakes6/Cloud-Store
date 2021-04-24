@@ -22,17 +22,6 @@ let router = new Router({
             ),
         },
         {
-            path:"/groupManagment",
-            name:"groupsPage",
-            component: () =>
-            import(
-               /*webpackChunkName: "groupManagment"*/ "..//views//groupsPage.vue" 
-            ),
-            meta:{
-                requiresAuth: true
-            }
-        },
-        {
             path:"/myGroups",
             name:"myGroups",
             component: () =>
@@ -72,7 +61,7 @@ router.beforeEach((to, from, next) => {
     } else if (to.matched.some((record) => record.meta.requiresGuest)) {
       if (auth.currentUser) {
         next({
-          path: "/dash",
+          path: "/",
           query: {
             redirect: to.fullPath,
           },

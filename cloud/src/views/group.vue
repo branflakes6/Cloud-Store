@@ -18,12 +18,9 @@
   <v-row>
     <div class="ma-4">
     <input type="file" ref="file" v-on:change="handleUpload()"/>
-    <v-btn v-on:click="uploadFile()">Upload</v-btn>
+    <v-btn v-on:click="uploadFile(file)">Upload</v-btn>
    </div>
     
-</v-row>
-<v-row align="center">
-    <v-btn v-on:click="listFiles()" class="ma-4">list files</v-btn>
 </v-row>
 <div v-for="item in fileList" :key="item.name" class="ma-4"> 
     <v-row >
@@ -58,9 +55,10 @@
 
 
 <script>
-import {db, st} from '../firebase'
+import {db, st, auth} from '../firebase'
 import firebase from 'firebase/app'
 import fileDownload from 'js-file-download';
+import {RSA} from 'hybrid-crypto-js'
 export default {
     name: "group",
     components: {
@@ -113,22 +111,40 @@ export default {
     handleUpload() {
             this.file = this.$refs.file.files[0]
     },
-    uploadFile(){
-      console.log(this.file)
-      st.ref().child(`${this.groupId}/${this.file.name}`).put(this.file)
-     },
+    uploadFile(file){
+   
+        st.ref().child(`${this.groupId}/${file.name}`).put(file)
+        this.listFiles()
+        }
     },
     created() {
     this.groupId = this.$route.params.groupId  
-    console.log(this.groupId)
     db.collection("groups").doc(this.groupId).get().then((doc) => {
+        let rsa = new RSA();
+
+        rsa.generateKeyPair(function(keyPair){
+            var publicKey = keyPair.publicKey;
+            var privateKey = keyPair.privateKey;
+            this.publicKey = publicKey
+            this.privateKey = privateKey
+        });
+        
         this.groupName = doc.data().groupName
+        this.groupOwner = doc.data().owner
+        if(doc.data().owner == auth.currentUser.email){
+            this.isOwner = true
+        }
+
     })
+    this.listFiles()
 },
     data() {
         return {
             showAddMember: false,
+            groupOwner: "",
             groupName: "",
+            publicKey: "",
+            privateKey: "",
             imageData: null,
             picture: null,
             uploadValue: 0,
@@ -143,7 +159,4 @@ export default {
 
 
 <style>
-
-
-
 </style>

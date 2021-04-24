@@ -1,24 +1,30 @@
 <template>
 <v-container>
   <div>
-    <div>
+    <div >
+      <v-row justify="center" class="ma-8"> 
       <h1>Welcome To The Cloud</h1>
-      <h3>
-      </h3>
+      </v-row>
+      <v-row justify="center" class="ma-16" >
       <div>
+        <v-col>
         <v-btn
           width="200"
           v-on:click="showSignUpForm = !showSignUpForm"
         >
           Create Account
         </v-btn>
+        </v-col>
+        <v-col>
         <v-btn
           width="200"
           v-on:click="showSignInForm = !showSignInForm"
         >
           Sign In
         </v-btn>
+        </v-col>
       </div>
+      </v-row>
       <v-dialog v-model="showSignUpForm" max-width="640">
         <v-card>
           <v-card-text>
@@ -146,7 +152,6 @@ export default {
         e.preventDefault();
     },
       login: function(e){
-        //auth.setPersistence(auth.Auth.Persistence.LOCAL)
         auth.signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
             .then(user => {
               alert('You are logged in as '+this.signInEmail);
