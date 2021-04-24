@@ -1,5 +1,6 @@
 <template>
-  <div >
+<v-container>
+  <div>
     <div>
       <h1>Welcome To The Cloud</h1>
       <h3>
@@ -18,7 +19,6 @@
           Sign In
         </v-btn>
       </div>
-
       <v-dialog v-model="showSignUpForm" max-width="640">
         <v-card>
           <v-card-text>
@@ -68,7 +68,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-
       <v-dialog v-model="showSignInForm" max-width="640">
         <v-card>
           <v-card-text>
@@ -82,7 +81,6 @@
                     required
                   ></v-text-field>
                 </v-col>
-
                 <v-col cols="12">
                   <v-text-field
                     v-model="signInPassword"
@@ -110,14 +108,14 @@
         </v-card>
       </v-dialog>
     </div>
-
   </div>
+  </v-container>
 </template>
 
 <script>
-import firebase from 'firebase'
+import {auth} from '../firebase'
 export default {
-  name: "homePage",
+  name: "logIn",
   components: {},
   data: function(){
     return{
@@ -136,7 +134,7 @@ export default {
   },
   methods:{
     register: function(e){
-        firebase.auth().createUserWithEmailAndPassword(this.signUpEmail,this.signUpPassword)
+        auth.createUserWithEmailAndPassword(this.signUpEmail,this.signUpPassword)
             .then(user => {
               alert('Account created for '+this.signUpEmail);
               this.$router.push('/');
@@ -148,11 +146,10 @@ export default {
         e.preventDefault();
     },
       login: function(e){
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        firebase.auth().signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
+        //auth.setPersistence(auth.Auth.Persistence.LOCAL)
+        auth.signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
             .then(user => {
               alert('You are logged in as '+this.signInEmail);
-              this.showSignInForm = false;
               this.$root.loggedIn = true;
               this.$router.push('/groupManagment');
               console.log(user)

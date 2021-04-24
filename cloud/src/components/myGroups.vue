@@ -1,20 +1,21 @@
 <template>
 <div>
-<div v-for="item in groupList" :key="item">
+ <v-container>
+ <v-row>
+  <div v-for="item in groupList" :key="item.groupName">
+    <v-col>
    <v-btn @click="toGroup(item.groupID)">
         {{item.groupName}}
    </v-btn>
-
-</div>
+   </v-col>
+  </div>
+  </v-row>
+ </v-container>
 </div>
 </template>
 
-
-
 <script>
-import firebase from 'firebase';
-
-const db = firebase.firestore();
+import {db, auth} from '../firebase'
 export default {
     name: "myGroups",
     components: {
@@ -26,26 +27,17 @@ export default {
         }
     },
     created() {
-        db.collection("users").doc(firebase.auth().currentUser.email).get().then((doc) => {
+        db.collection("users").doc(auth.currentUser.email).get().then((doc) => {
             this.groupList = doc.data().groups
-            console.log(this.groupList)
         })
     },
     data() {
         return{
             groupList: []
         }
-
     }
 }
-
 </script>
 
-
-
-
 <style>
-
-
-
 </style>

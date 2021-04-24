@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 import homePage from "@/components/homePage";
-import firebase from "firebase";
+import {auth} from "../firebase";
 
 Vue.use(Router);
 let router = new Router({
@@ -12,6 +12,14 @@ let router = new Router({
             name: "homepage",
             component: homePage,
             meta: {},
+        },
+        {
+          path:"/login",
+          name: "login",
+          component: () =>
+            import(
+               /*webpackChunkName: "login"*/ "..//components//logIn.vue" 
+            ),
         },
         {
             path:"/groupManagment",
@@ -51,7 +59,7 @@ let router = new Router({
 })
 router.beforeEach((to, from, next) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-      if (!firebase.auth().currentUser) {
+      if (!auth.currentUser) {
         next({
           path: "/",
           query: {
@@ -62,7 +70,7 @@ router.beforeEach((to, from, next) => {
         next();
       }
     } else if (to.matched.some((record) => record.meta.requiresGuest)) {
-      if (firebase.auth().currentUser) {
+      if (auth.currentUser) {
         next({
           path: "/dash",
           query: {
