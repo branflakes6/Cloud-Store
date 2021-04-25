@@ -53,7 +53,6 @@
         </v-card-text>
     </v-card>
    </v-dialog>
-   
 </div>
 </template>
 
@@ -71,18 +70,14 @@ export default {
             this.$router.push(`group/${ID}`)
         },
         exKeys(keyPair) {
-        var pubKey = keyPair.publicKey
-        var privKey = keyPair.privateKey
-        this.publicKey = pubKey
-        this.privateKey = privKey
-        console.log(this.publicKey)
-        console.log(this.privateKey)
+          var pubKey = keyPair.publicKey
+          var privKey = keyPair.privateKey
+          this.publicKey = pubKey
+          this.privateKey = privKey
           db.collection("groups").add({
             groupName: this.groupName,
             owner: auth.currentUser.email,
-            publicKey: this.publicKey,
-            privateKey: this.privateKey
-
+            publicKey: this.publicKey
             }).then(
                 function(docRef) {
                     db.collection("users")
@@ -98,14 +93,13 @@ export default {
         },
          createGroup() {
         var rsa = new RSA();
-        rsa.generateKeyPair(this.exKeys);
-
-      
+        rsa.generateKeyPair(this.exKeys);  
     },
     },
     created() {
         db.collection("users").doc(auth.currentUser.email).get().then((doc) => {
             this.groupList = doc.data().groups
+            this.usersPrivate = doc.data().encryptedKey
         })
     },
     data() {
@@ -115,6 +109,7 @@ export default {
             groupName: "",
             publicKey: null,
             privateKey: null,
+            usersPrivate: null
         }
     }
 }

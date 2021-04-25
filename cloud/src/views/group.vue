@@ -92,7 +92,7 @@ methods: {
                 var crypt = new Crypt();
                 var decrypted = crypt.decrypt(pubKey, text)
                 console.log(decrypted)
-                fileDownload(decrypted.message, file.name)
+                fileDownload(atob(decrypted.message), file.name)
               };
             };  
                 xhr.open('GET', url);
@@ -118,10 +118,12 @@ methods: {
         var reader = new FileReader()
         var pubKey = this.publicKey
         var ID = this.groupId
+        console.log(file)
         reader.onload =function(event) { 
             console.log(event.target.result)  
+            var text = btoa(event.target.result)
             var crypt = new Crypt();
-            var encrypted = crypt.encrypt(pubKey, event.target.result);
+            var encrypted = crypt.encrypt(pubKey, text);
             console.log(encrypted)
             st.ref().child(`${ID}/${file.name}`).putString(encrypted)   
         }

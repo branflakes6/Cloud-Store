@@ -119,7 +119,9 @@
 </template>
 
 <script>
-import {auth} from '../firebase'
+import {db, auth} from '../firebase'
+import { RSA } from 'hybrid-crypto-js';
+import CryptoJS from "crypto-js";
 export default {
   name: "logIn",
   components: {},
@@ -135,7 +137,9 @@ export default {
       password: '',
       showSignInForm: false,
       showSignUpForm: false,
-      showPass: true
+      showPass: true,
+      publicKey: null,
+      privateKey: null
     };
   },
   methods:{
@@ -143,18 +147,36 @@ export default {
         auth.createUserWithEmailAndPassword(this.signUpEmail,this.signUpPassword)
             .then(user => {
               alert('Account created for '+this.signUpEmail);
-              this.$router.push('/');
+              sessionStorage.setItem("pass", this.signInPassword)
               console.log(user)
+              var rsa = new RSA();
+              rsa.generateKeyPair(this.newUser)
               },
               err => {
                   alert(err.message)
             })
         e.preventDefault();
     },
+    newUser(keyPair) {
+      
+      var pubKey = keyPair.publicKey
+      var privKey = keyPair.privateKey
+      this.publicKey = pubKey
+      this.privateKey = privKey
+      console.log(this.signUpPassword)
+      var encrypted = CryptoJS.AES.encrypt(String(this.privateKey), this.signUpPassword).toString();
+      db.collection("users").doc(this.signUpEmail).set({
+        userName: this.signUpUsername,
+        email: this.signUpEmail,
+        publicKey: this.publicKey,
+        encryptedKey: encrypted
+      })
+    },
       login: function(e){
         auth.signInWithEmailAndPassword(this.signInEmail,this.signInPassword)
             .then(user => {
               alert('You are logged in as '+this.signInEmail);
+              sessionStorage.setItem("pass", this.signInPassword)
               this.$root.loggedIn = true;
               this.$router.push('/groupManagment');
               console.log(user)
