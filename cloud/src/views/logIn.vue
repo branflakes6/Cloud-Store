@@ -3,7 +3,7 @@
   <div>
     <div >
       <v-row justify="center" class="ma-8"> 
-      <h1>Welcome To The Cloud</h1>
+      <h1 class="font-weight-thin">Welcome To The Cloud</h1>
       </v-row>
       <v-row justify="center" class="ma-16" >
       <div>
@@ -11,6 +11,7 @@
         <v-btn
           width="200"
           v-on:click="showSignUpForm = !showSignUpForm"
+          class="font-weight-thin"
         >
           Create Account
         </v-btn>
@@ -19,6 +20,7 @@
         <v-btn
           width="200"
           v-on:click="showSignInForm = !showSignInForm"
+          class="font-weight-thin"
         >
           Sign In
         </v-btn>
@@ -162,8 +164,8 @@ export default {
       var privKey = keyPair.privateKey
       this.publicKey = pubKey
       this.privateKey = privKey
-      console.log(this.signUpPassword)
       var encrypted = CryptoJS.AES.encrypt(String(this.privateKey), this.signUpPassword).toString();
+      sessionStorage.setItem("pass", this.signInPassword)
       db.collection("users").doc(this.signUpEmail).set({
         userName: this.signUpUsername,
         email: this.signUpEmail,

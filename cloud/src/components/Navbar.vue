@@ -12,7 +12,7 @@
       <v-list>
         <v-list-item v-for="item in items" :key="item.title" :to="item.to" link>
           <v-list-item-content>
-            <v-list-item-title class="title">
+            <v-list-item-title class="title font-weight-thin" >
               {{ item.title }}
             </v-list-item-title>
           </v-list-item-content>

@@ -4,24 +4,28 @@
      <v-row>
      <v-spacer></v-spacer>
      </v-row>
+    
+    <v-row justify="center">
+        <h3 class="font-weight-thin ma-4"> Your Groups: </h3>
+    </v-row>
+
+     <div :key="updated">
+         <v-row justify="center">
+          <div v-for="item in groupList" :key="item.groupName">
+          <v-col>
+          <v-btn color="info" @click="toGroup(item.groupID)">
+            {{item.groupName}}
+          </v-btn>
+          </v-col>
+          </div>
+       </v-row>
+    </div >
     <v-row align="end" justify="center" class="ma-8">
-     <v-btn @click="newGroup = !newGroup">
+     <v-btn color="blue lighten-2" text  @click="newGroup = !newGroup">
          create a group
      </v-btn>
     </v-row>
-    <v-row justify="center">
-        <h3> Your Groups </h3>
-    </v-row>
- <v-row justify="center">
-     
-  <div v-for="item in groupList" :key="item.groupName">
-    <v-col>
-   <v-btn @click="toGroup(item.groupID)">
-        {{item.groupName}}
-   </v-btn>
-   </v-col>
-  </div>
-  </v-row>
+
  </v-container>
 
  <v-dialog v-model="newGroup" max-width="500px">
@@ -78,7 +82,6 @@ export default {
           this.privateKey = privKey
           const crypt = new Crypt()
           this.privateKey = crypt.encrypt(this.usersKey, String(this.privateKey));
-          console.log(this.privateKey )
           db.collection("groups").add({
             groupName: this.groupName,
             owner: auth.currentUser.email,
@@ -97,10 +100,19 @@ export default {
                 }.bind(this)
             )
         },
-         createGroup() {
+        createGroup() {
         var rsa = new RSA();
-        rsa.generateKeyPair(this.exKeys);  
-    },
+        rsa.generateKeyPair(this.exKeys) 
+        this.newGroup = !this.newGroup
+        this.updateGroups() 
+     },
+     updateGroups(){
+         this.groupList = ""
+         db.collection("users").doc(auth.currentUser.email).get().then((doc) => {
+            this.groupList = doc.data().groups
+            this.updated = this.updated + 1
+        }) 
+     }
     },
     created() {
         db.collection("users").doc(auth.currentUser.email).get().then((doc) => {
@@ -116,7 +128,8 @@ export default {
             groupName: "",
             publicKey: null,
             privateKey: null,
-            usersKey: null
+            usersKey: null,
+            updated: 0
         }
     }
 }

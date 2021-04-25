@@ -1,48 +1,76 @@
 <template>
 <div>
 <v-container>
- <v-row justify="center">
-   <h1>{{this.groupName}}</h1>
-   <h1>Group Owner: {{this.groupOwner}}</h1>
- </v-row>
+ 
+    <v-row justify="center">
+        <h1 class="font-weight-thin">{{this.groupName}}</h1>
+   </v-row>
+
+   <v-row justify="center">
+        <h4 class="font-weight-thin">Group Owner: {{this.groupOwner}}</h4>
+   </v-row>
+
 
  <v-row justify="center">
      <div v-if="isOwner">
    <v-btn
    v-on:click="showAddMember = !showAddMember"
    class="ma-4"
+   color="blue lighten-2" text
    >
     Add a member
     </v-btn>
      <v-btn
     v-on:click="showRemoveMember = !showRemoveMember"
     class="ma-4"
+    color="blue lighten-2" text
    >
     Remove Member
     </v-btn>
     </div>
  </v-row>
-  <v-row justify="center">
+ 
+ <v-row justify="center">
+    <h3 class="font-weight-thin"> Upload a file </h3>
+</v-row>
+
+  <v-row justify="center" outlined>
     <div class="ma-4">
     <input type="file" ref="file" v-on:change="handleUpload()"/>
-    <v-btn v-on:click="uploadFile(file)">Upload</v-btn>
+    <v-btn color="blue lighten-2" text v-on:click="uploadFile(file)">Upload</v-btn>
    </div>
     
 </v-row>
+
 <div v-for="item in fileList" :key="item.name" class="ma-4"> 
     <v-row justify="center">
-    <v-btn 
-    align="center" 
-    justify="space-around" 
-    class="ma-4"
-    @click="downloadFile(item)"
-    >
-    {{item.name}}
-    </v-btn>
+    <v-card style="width:40%" class="mx-auto">
+        <v-card-title>
+            <v-card-text class="text--primary">
+                {{item.name}}
+                <v-card-actions>
+                <v-btn 
+                color="blue lighten-2"
+                text
+                @click="downloadFile(item)"
+                >
+                Download
+                </v-btn>
+                <v-btn 
+                color="blue lighten-2"
+                text
+                @click="deleteFile(item)"
+                >
+                Delete
+                </v-btn>
+                </v-card-actions>
+            </v-card-text>
+        </v-card-title>
+    </v-card>
     </v-row>
 </div>
 </v-container>
-<v-dialog v-model="showAddMember">
+<v-dialog v-model="showAddMember" max-width="500px">
   <v-card>
       <v-card-text>
           <v-container>
@@ -50,15 +78,18 @@
               v-model="newMember"
               label="Enter an email"
               ></v-text-field>
+              <v-row justify="center">
               <v-btn
                   @click="addMember"
+                  
               > Add</v-btn>
+              </v-row>
           </v-container>
       </v-card-text>
   </v-card>
 </v-dialog>
 
-<v-dialog v-model="showRemoveMember">
+<v-dialog v-model="showRemoveMember" max-width="500px">
   <v-card>
       <v-card-text>
           <v-container>
@@ -66,9 +97,11 @@
               v-model="removeMember"
               label="Enter an email"
               ></v-text-field>
+              <v-row justify="center">
               <v-btn
                   @click="removeMemberFunc"
               > Remove</v-btn>
+              </v-row>
           </v-container>
       </v-card-text>
   </v-card>
@@ -106,7 +139,8 @@ methods: {
                     })
                 })
             })
-        })    
+        }) 
+        this.showAddMember = !this.showAddMember
     },
     removeMemberFunc() {
          db.collection("users").doc(this.removeMember).get().then((doc) =>{
@@ -116,7 +150,6 @@ methods: {
                      this.groupToRemove = uGroups[i]
                  }
              }
-            //console.log(this.groupToRemove)
             db.collection("users").doc(this.removeMember).update({
             groups: firebase.firestore.FieldValue.arrayRemove({
                 encryptedKey: this.groupToRemove.encryptedKey,
@@ -125,6 +158,7 @@ methods: {
                 })
             })
          })
+         this.showRemoveMember = ! this.showRemoveMember
     },
     async downloadFile(file){
             var privKey = this.groupPrivKey
@@ -136,6 +170,7 @@ methods: {
                 const text = xhr.response
                 var crypt = new Crypt();
                 var decrypted = crypt.decrypt(privKey, text)
+
                 var buf = new ArrayBuffer(decrypted.message.length*2);
                 var bufView = new Uint8Array(buf)
                 var strLen = decrypted.message.length
@@ -174,17 +209,20 @@ methods: {
         var ID = this.groupId
         var privKey = this.groupPrivKey
             var buffer = await file.arrayBuffer()
-            console.log(buffer)
             var text = String.fromCharCode.apply(null, new Uint8Array(buffer));
-            console.log("text = " + text)
-             var crypt = new Crypt();
-             var sig = crypt.signature(privKey, text)
-             var encrypted = crypt.encrypt(pubKey, text, sig);
-             console.log("Encrypted = " + encrypted)
-             st.ref().child(`${ID}/${file.name}`).putString(encrypted)        
+            var crypt = new Crypt();
+            var sig = crypt.signature(privKey, text)
+            var encrypted = crypt.encrypt(pubKey, text, sig);
+            st.ref().child(`${ID}/${file.name}`).putString(encrypted)        
         this.listFiles()
-      }
+      },
+      deleteFile(file) {
+        var ID = this.groupId
+        st.ref().child(`${ID}/${file.name}`).delete()
+        this.listFiles()
     },
+    },
+    
     created() {
     this.groupId = this.$route.params.groupId  
     db.collection("groups").doc(this.groupId).get().then((doc) => {  
@@ -210,7 +248,6 @@ methods: {
         var crypt = new Crypt()
         var decrypted = crypt.decrypt(userPrivKey, String(this.groupPrivKey))
         this.groupPrivKey = decrypted.message
-        //console.log(this.groupPrivKey)
     })
     this.listFiles()
 },
