@@ -158,7 +158,6 @@ export default {
         e.preventDefault();
     },
     newUser(keyPair) {
-      
       var pubKey = keyPair.publicKey
       var privKey = keyPair.privateKey
       this.publicKey = pubKey
@@ -178,7 +177,7 @@ export default {
               alert('You are logged in as '+this.signInEmail);
               sessionStorage.setItem("pass", this.signInPassword)
               this.$root.loggedIn = true;
-              this.$router.push('/groupManagment');
+              this.$router.push('/myGroups');
               console.log(user)
               },
               err => {

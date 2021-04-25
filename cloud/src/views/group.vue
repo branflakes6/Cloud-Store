@@ -35,7 +35,7 @@
     align="center" 
     justify="space-around" 
     class="ma-4"
-    v-on:click="downloadFile(item)"
+    @click="downloadFile(item)"
     >
     {{item.name}}
     </v-btn>
@@ -68,7 +68,7 @@
               ></v-text-field>
               <v-btn
                   @click="removeMemberFunc"
-              > Add</v-btn>
+              > Remove</v-btn>
           </v-container>
       </v-card-text>
   </v-card>
@@ -116,7 +116,7 @@ methods: {
                      this.groupToRemove = uGroups[i]
                  }
              }
-            console.log(this.groupToRemove)
+            //console.log(this.groupToRemove)
             db.collection("users").doc(this.removeMember).update({
             groups: firebase.firestore.FieldValue.arrayRemove({
                 encryptedKey: this.groupToRemove.encryptedKey,
@@ -126,28 +126,29 @@ methods: {
             })
          })
     },
-    downloadFile(file){
+    async downloadFile(file){
             var privKey = this.groupPrivKey
             var pubKey = this.publicKey
-            st.ref().child(file.fullPath).getDownloadURL().then((url) =>{
-                console.log(url)
+            st.ref().child(file.fullPath).getDownloadURL().then( async (url) =>{
                 var xhr = new XMLHttpRequest();
-                xhr.responseType = 'blob';
-                xhr.onload = () => {
-                const fr = new FileReader();
-                fr.readAsBinaryString(xhr.response);
-                fr.onload = function (event)  {
-                const text = event.target.result;
+                xhr.responseType = 'text';
+                xhr.onload = async () => {
+                const text = xhr.response
                 var crypt = new Crypt();
                 var decrypted = crypt.decrypt(privKey, text)
+                var buf = new ArrayBuffer(decrypted.message.length*2);
+                var bufView = new Uint8Array(buf)
+                var strLen = decrypted.message.length
+                for(var i =0; i<strLen; i++){
+                    bufView[i] = decrypted.message.charCodeAt(i)
+                }
                 var verified = crypt.verify(
                     pubKey,
                     decrypted.signature,
                     decrypted.message,
                 )
                 console.log(verified)
-                fileDownload(atob(decrypted.message), file.name)
-              };
+                fileDownload(buf, file.name)
             };  
                 xhr.open('GET', url);
                 xhr.send();
@@ -168,22 +169,21 @@ methods: {
     handleUpload() {
             this.file = this.$refs.file.files[0]
     },
-    uploadFile(file) {    
-        var reader = new FileReader()
+    async uploadFile(file) {    
         var pubKey = this.publicKey
         var ID = this.groupId
         var privKey = this.groupPrivKey
-        reader.onload =function(event) { 
-            var text = btoa(event.target.result)
-            var crypt = new Crypt();
-            console.log(privKey)
-            var sig = crypt.signature(privKey, text)
-            var encrypted = crypt.encrypt(pubKey, text, sig);
-            st.ref().child(`${ID}/${file.name}`).putString(encrypted)   
-        }
-        reader.readAsBinaryString(file);
+            var buffer = await file.arrayBuffer()
+            console.log(buffer)
+            var text = String.fromCharCode.apply(null, new Uint8Array(buffer));
+            console.log("text = " + text)
+             var crypt = new Crypt();
+             var sig = crypt.signature(privKey, text)
+             var encrypted = crypt.encrypt(pubKey, text, sig);
+             console.log("Encrypted = " + encrypted)
+             st.ref().child(`${ID}/${file.name}`).putString(encrypted)        
         this.listFiles()
-        }
+      }
     },
     created() {
     this.groupId = this.$route.params.groupId  
@@ -210,7 +210,7 @@ methods: {
         var crypt = new Crypt()
         var decrypted = crypt.decrypt(userPrivKey, String(this.groupPrivKey))
         this.groupPrivKey = decrypted.message
-        console.log(this.groupPrivKey)
+        //console.log(this.groupPrivKey)
     })
     this.listFiles()
 },
