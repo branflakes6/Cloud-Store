@@ -58,13 +58,13 @@
 import {db, st, auth} from '../firebase'
 import firebase from 'firebase/app'
 import fileDownload from 'js-file-download';
-import {RSA} from 'hybrid-crypto-js'
+import { Crypt } from 'hybrid-crypto-js'
 export default {
-    name: "group",
-    components: {
-    },
-    methods: {
-        addMember() {
+name: "group",
+components: {
+},
+methods: {
+    addMember() {
             db.collection("groups").doc(this.groupId).update({
                 members: firebase.firestore.FieldValue.arrayUnion({
                     member: this.newMember
@@ -78,25 +78,28 @@ export default {
                     })
                 )
         },
-        downloadFile(file){
+    downloadFile(file){
+            var pubKey = this.privateKey
             st.ref().child(file.fullPath).getDownloadURL().then((url) =>{
                 var xhr = new XMLHttpRequest();
                 xhr.responseType = 'blob';
                 xhr.onload = () => {
-                let blob = xhr.response;
                 const fr = new FileReader();
-                 fr.readAsDataURL(blob);
-                 fr.onload = function (event)  {
+                fr.readAsBinaryString(xhr.response);
+                fr.onload = function (event)  {
                 const text = event.target.result;
-                let resp = atob(text.split(",")[1]);
-                fileDownload(resp, file.name)
+                console.log(text)
+                var crypt = new Crypt();
+                var decrypted = crypt.decrypt(pubKey, text)
+                console.log(decrypted)
+                fileDownload(decrypted.message, file.name)
               };
             };  
                 xhr.open('GET', url);
                 xhr.send();
             })
         },
-        listFiles(){
+    listFiles(){
             this.fileList = []
             var listRef = st.ref().child(this.groupId)
             listRef.listAll()
@@ -111,30 +114,31 @@ export default {
     handleUpload() {
             this.file = this.$refs.file.files[0]
     },
-    uploadFile(file){
-   
-        st.ref().child(`${this.groupId}/${file.name}`).put(file)
+    uploadFile(file) {    
+        var reader = new FileReader()
+        var pubKey = this.publicKey
+        var ID = this.groupId
+        reader.onload =function(event) { 
+            console.log(event.target.result)  
+            var crypt = new Crypt();
+            var encrypted = crypt.encrypt(pubKey, event.target.result);
+            console.log(encrypted)
+            st.ref().child(`${ID}/${file.name}`).putString(encrypted)   
+        }
+        reader.readAsBinaryString(file);
         this.listFiles()
         }
     },
     created() {
     this.groupId = this.$route.params.groupId  
-    db.collection("groups").doc(this.groupId).get().then((doc) => {
-        let rsa = new RSA();
-
-        rsa.generateKeyPair(function(keyPair){
-            var publicKey = keyPair.publicKey;
-            var privateKey = keyPair.privateKey;
-            this.publicKey = publicKey
-            this.privateKey = privateKey
-        });
-        
+    db.collection("groups").doc(this.groupId).get().then((doc) => {  
         this.groupName = doc.data().groupName
         this.groupOwner = doc.data().owner
+        this.publicKey = doc.data().publicKey
+        this.privateKey = doc.data().privateKey
         if(doc.data().owner == auth.currentUser.email){
             this.isOwner = true
         }
-
     })
     this.listFiles()
 },
@@ -143,8 +147,8 @@ export default {
             showAddMember: false,
             groupOwner: "",
             groupName: "",
-            publicKey: "",
-            privateKey: "",
+            publicKey: null,
+            privateKey: null,
             imageData: null,
             picture: null,
             uploadValue: 0,
