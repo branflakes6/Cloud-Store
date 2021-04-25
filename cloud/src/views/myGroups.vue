@@ -59,7 +59,9 @@
 <script>
 import {db, auth} from '../firebase'
 import firebase from 'firebase/app'
-import { RSA } from 'hybrid-crypto-js'
+import { Crypt, RSA } from 'hybrid-crypto-js'
+
+
 export default {
     name: "myGroups",
     components: {
@@ -74,6 +76,9 @@ export default {
           var privKey = keyPair.privateKey
           this.publicKey = pubKey
           this.privateKey = privKey
+          const crypt = new Crypt()
+          this.privateKey = crypt.encrypt(this.usersKey, String(this.privateKey));
+          console.log(this.privateKey )
           db.collection("groups").add({
             groupName: this.groupName,
             owner: auth.currentUser.email,
@@ -85,7 +90,8 @@ export default {
                     .update({
                         groups: firebase.firestore.FieldValue.arrayUnion({
                             groupName: this.groupName,
-                            groupID: docRef.id
+                            groupID: docRef.id,
+                            encryptedKey: this.privateKey 
                         }),
                     })
                 }.bind(this)
@@ -99,8 +105,9 @@ export default {
     created() {
         db.collection("users").doc(auth.currentUser.email).get().then((doc) => {
             this.groupList = doc.data().groups
-            this.usersPrivate = doc.data().encryptedKey
+            this.usersKey = doc.data().publicKey
         })
+
     },
     data() {
         return{
@@ -109,7 +116,7 @@ export default {
             groupName: "",
             publicKey: null,
             privateKey: null,
-            usersPrivate: null
+            usersKey: null
         }
     }
 }
